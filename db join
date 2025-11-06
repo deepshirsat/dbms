@@ -1,0 +1,62 @@
+CREATE TABLE customer (
+    customer_id INT PRIMARY KEY,
+    first_name VARCHAR(50)
+);
+ 
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    amount INT,
+    customer_id INT
+);
+ 
+ 
+INSERT INTO customer VALUES
+(1, 'Aditi'),
+(2, 'Riya'),
+(3, 'Neha'),
+(4, 'Karan'); 	-- This customer has no orders
+ 
+INSERT INTO orders VALUES
+(101, 500, 1),
+(102, 700, 1),
+(103, 300, 2),
+(104, 900, 3),
+(105, 400, NULL);  -- Order with no customer
+ 
+ 
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+INNER JOIN orders o
+ON c.customer_id = o.customer_id;
+ 
+ 
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id;
+ 
+ 
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o
+ON c.customer_id = o.customer_id;
+ 
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id
+ 
+UNION
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o
+ON c.customer_id = o.customer_id;
+ 
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+CROSS JOIN orders o;
