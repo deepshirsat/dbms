@@ -1,0 +1,79 @@
+CREATE TABLE Borrower (
+    Roll_no INT,
+    Name VARCHAR(50),
+    DateofIssue DATE,
+    NameofBook VARCHAR(100),
+    Status CHAR(1)   -- I = Issued, R = Returned
+);
+ 
+ 
+CREATE TABLE Fine (
+    Roll_no INT,
+    Date DATE,
+    Amt INT
+);
+ 
+ 
+INSERT INTO Borrower VALUES
+(101, 'Aditi', '2024-10-01', 'Java Programming', 'I'),
+(102, 'Riya', '2024-10-20', 'DBMS', 'I'),
+(103, 'Neha', '2024-11-01', 'Python Basics', 'I');
+ 
+DELIMITER $$
+ 
+CREATE PROCEDURE CalcFine(
+    IN p_roll INT,
+    IN p_book VARCHAR(100)
+)
+BEGIN
+    DECLARE v_issue_date DATE;
+    DECLARE v_days INT DEFAULT 0;
+    DECLARE v_fine INT DEFAULT 0;
+ 
+    -- Exception Handler
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    	SELECT 'Error occurred while calculating fine.' AS Message;
+    END;
+ 
+    -- Fetch Issue Date
+    SELECT DateofIssue INTO v_issue_date
+    FROM Borrower
+    WHERE Roll_no = p_roll AND NameofBook = p_book;
+ 
+    -- Calculate number of days
+    SET v_days = DATEDIFF(CURDATE(), v_issue_date);
+ 
+    -- Fine Calculation
+    IF v_days > 30 THEN
+    	SET v_fine = (30 * 5) + ((v_days - 30) * 50);
+    ELSEIF v_days BETWEEN 15 AND 30 THEN
+    	SET v_fine = v_days * 5;
+    ELSE
+    	SET v_fine = 0;
+    END IF;
+ 
+    -- Update Status to Returned
+    UPDATE Borrower
+    SET Status = 'R'
+    WHERE Roll_no = p_roll AND NameofBook = p_book;
+ 
+    -- Insert into Fine Table if fine exists
+    IF v_fine > 0 THEN
+    	INSERT INTO Fine(Roll_no, Date, Amt)
+    	VALUES(p_roll, CURDATE(), v_fine);
+    END IF;
+ 
+    -- Final Output
+    SELECT
+    	p_roll AS Roll_Number,
+    	p_book AS Book_Name,
+    	v_days AS Days_Borrowed,
+    	v_fine AS Fine_Amount;
+ 
+END $$
+ 
+DELIMITER ;
+ 
+ 
+CALL CalcFine(101, 'Java Programming');
